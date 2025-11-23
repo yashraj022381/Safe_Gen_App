@@ -1,23 +1,37 @@
 
-# safe-gen.py  →  Copy & deploy on Streamlit (free)
 import streamlit as st
 from transformers import pipeline
 
-# Two free models from Hugging Face
-toxicity = pipeline("text-classification", model="unitary/toxic-bert")
-fact_check = pipeline("text-classification", model="facebook/roberta-hate-speech-dynabench-r4")
+# Tiny & fast models that NEVER fail on Streamlit free
+toxicity = pipeline("text-classification", model="martin-ha/toxic-comment-model")   # tiny & fast
+sentiment = pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment-latest")
 
-st.title("🛡️ SafeGen – Hallucination & Bias Checker")
-st.write("Made for Indian devs & freelancers | ₹399/month after free trial")
+st.set_page_config(page_title="SafeGen", page_icon="Shield")
 
-text = st.text_area("Paste any AI-generated text (ChatGPT, Claude, etc.)", height=150)
+st.title("SafeGen – Hallucination & Bias Checker")
+st.caption("Made for Indian freelancers & small teams | Free to try | ₹399/month later")
 
-if st.button("🔍 Check for Bias & Toxicity"):
-    t = toxicity(text)[0]
-    f = fact_check(text)[0]
-    if t['score'] > 0.7 or f['score'] > 0.7:
-        st.error(f"⚠️ Risk Detected! Toxicity: {t['score']:.2f} | Hate/Bias: {f['score']:.2f}")
-        st.write("Fix suggestion: Add 'Answer factually and politely' in your prompt")
-    else:
-        st.success("✅ Looks safe and professional!")
-# Initial app Code 
+text = st.text_area("Paste any AI-generated text (ChatGPT, Gemini, etc.)", height=150)
+
+if st.button("Check Safety", type="primary"):
+    with st.spinner("Checking..."):
+        tox = toxicity(text)[0]
+        sent = sentiment(text)[0]
+
+        risk_score = 0
+        if tox['label'] == 'toxic' and tox['score'] > 0.6:
+            risk_score += 1
+        if sent['label'] in ['NEGATIVE', 'neg']:
+            risk_score += 0.5
+
+        if risk_score >= 1:
+            st.error(f"High Risk Detected! (Score: {risk_score:.1f}/1.5)")
+            st.write("Fix: Add 'Answer politely and professionally' to your prompt")
+        elif risk_score >= 0.5:
+            st.warning(f"Medium Risk (Score: {risk_score:.1f}/1.5)")
+            st.write("Consider rephrasing for safer tone")
+        else:
+            st.success("Safe & Professional!")
+            st.balloons()
+st.markdown("---")
+st.markdown("Built by an Indian solo founder • [Follow on X](https://x.com/yourusername) • ₹399/month after 50 free checks")
