@@ -4,3 +4,4 @@ transformers==4.35.0
 torch==2.1.0
 markdown-it-py==3.0.0
 rich==13.7.1
+--upgrade pip
