@@ -1,7 +1,6 @@
 
-streamlit==1.37.0 
-transformers==4.44.0
+streamlit
+transformers
 torch==2.5.1+cpu
 torchvision==0.20.1+cpu
-rich==13.7.1
 --index-url https://download.pytorch.org/whl/cpu
