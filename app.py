@@ -20,7 +20,7 @@ def load_models():
         toxicity, hate = load_models()
     return toxicity, hate
 
-toxicity, hate = load_models()
+#toxicity, hate = load_models()
 
 # ----------------------------------- UI STARTS HERE -----------------------------------
 st.set_page_config(page_title="SafeGen – AI Bias Checker", page_icon="🛡️")
@@ -52,8 +52,8 @@ if st.button("Check for Bias & Toxicity", type="primary"):
         st.warning("Please paste some text first!")
     else:
         with st.spinner("Analysing..."):
-            t = toxicity(text)[0]
-            h = hate(text)[0]
+            t = toxicity((text)[0])
+            h = hate((text)[0])
             risk = max(t['score'], h['score'])
 
             if risk > 0.85:
