@@ -1,6 +1,7 @@
 import streamlit as st
 from transformers import pipeline
 import time
+import torch
 
 # ───── TINY & FAST MODELS (load in 15–25 seconds on free tier) ─────
 @st.cache_resource
