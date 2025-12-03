@@ -1,4 +1,6 @@
 
 streamlit
-transformers == 4.35.0
-torch == 2.1.0
+transformers
+torch
+markdown-it-py==2.2.0
+rich==13.7.1
