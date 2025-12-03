@@ -2,18 +2,16 @@ import streamlit as st
 import torch
 from transformers import pipeline
 
-# Load models (only once) – lighter models for Streamlit Cloud
-# Load models (only once) – TINY models for fast Streamlit Cloud loading
 @st.cache_resource
 def load_models():
-    # Super-light toxicity model (~50MB, loads in 10s)
     toxicity = pipeline("text-classification", 
-                       model="cardiffnlp/twitter-roberta-base-sentiment-latest",  # Tiny alternative
-                       device=-1)  # CPU only
-    # Even lighter hate model (~30MB)
+                       model="cardiffnlp/twitter-roberta-base-sentiment-latest",  # Tiny model
+                       device=-1,  # Force CPU
+                       torch_dtype=torch.float32)  # Explicit dtype for 3.13
     hate = pipeline("text-classification", 
-                   model="nlptown/bert-base-multilingual-uncased-sentiment",  # Multilingual, fast
-                   device=-1)  # CPU only
+                   model="nlptown/bert-base-multilingual-uncased-sentiment",
+                   device=-1,  # Force CPU
+                   torch_dtype=torch.float32)
     return toxicity, hate
 
 toxicity, hate = load_models()
