@@ -1,11 +1,19 @@
 import streamlit as st
+import torch
 from transformers import pipeline
 
-# Load models (only once)
+# Load models (only once) – lighter models for Streamlit Cloud
 @st.cache_resource
 def load_models():
-    toxicity = pipeline("text-classification", model="unitary/toxic-bert")
-    hate = pipeline("text-classification", model="martin-ha/toxic-comment-model")
+    # Simpler toxicity model (no torch dtype issues)
+    toxicity = pipeline("text-classification", 
+                       model="unitary/toxic-bert", 
+                       device=-1)  # Force CPU (device=-1)
+    # Even lighter hate model
+    hate = pipeline("text-classification", 
+                   model="martin-ha/toxic-comment-model", 
+                   device=-1)  # Force CPU
+    
     return toxicity, hate
 
 toxicity, hate = load_models()
