@@ -18,6 +18,10 @@ def load_models():
 
 toxicity, hate = load_models()
 
+# Show loading progress (makes it feel faster)
+with st.spinner("Loading AI models... (first time only, ~20 seconds)"):
+    pass  # Models already cached above
+
 st.title("🛡️ SafeGen – AI Bias & Toxicity Checker")
 st.markdown("**Made for Indian freelancers & devs** | ₹0 today, ₹399/month later")
 
