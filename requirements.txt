@@ -3,7 +3,7 @@ transformers == 4.44.0
 torch == 2.6.0
 mdurl == 0.1.2
 markdown-it-py == 4.0.6
-rich == 14.2.0
+rich == 10.14.0
 pygments == 2.19.1
 tokenizers == 0.19.1
 cargo == 1.19.1
