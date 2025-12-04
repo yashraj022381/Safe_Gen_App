@@ -5,4 +5,5 @@ mdurl == 0.1.2
 markdown-it-py == 4.0.6
 rich == 14.2.0
 pygments == 2.19.1
-
+tokenizers == 0.19.1
+cargo == 1.19.1
