@@ -1,3 +1,5 @@
 streamlit == 1.37.0
 transformers == 4.44.0
-torch == 2.5.1+cpu
+torch
+torchvision
+torchaudio
