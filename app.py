@@ -5,6 +5,10 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 
+#Always initialize messages like this (using dictionart-style access)
+if "messages" not in st.session_state:
+    st.session_state["messages"] = []
+    
 # Set up page config
 st.set_page_config(page_title="India Helper AI Chatbot", page_icon="🇮🇳")
 st.title("🇮🇳 India Problem Solver AI Agent")
