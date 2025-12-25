@@ -42,7 +42,7 @@ if prompt := st.chat_input("Ask me anything about problems in India..."):
     # Generate response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            llm = ChatOpenAI(model="gpt-4o-mini", api_key=api_key)
+            llm = ChatGroq(model="llama-3.3-70b-versatile", api_key=api_key)
 
             prompt_template = ChatPromptTemplate.from_messages([
                 ("system", system_prompt),
