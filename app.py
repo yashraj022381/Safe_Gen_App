@@ -6,6 +6,13 @@ from langchain_core.output_parsers import StrOutputParser
 
 st.set_page_config(page_title="India Helper AI Chatbot", page_icon="🇮🇳")
 st.title("🇮🇳 भारत हेल्पर AI - आपकी समस्याओं का समाधान")
+# Sidebar info
+st.sidebar.markdown("## 🇮🇳 भारत हेल्पर AI")
+st.sidebar.markdown("यह AI भारत के लोगों की रोज़मर्रा की समस्याओं में मदद करने के लिए बनाया गया है।")
+st.sidebar.markdown("**बनाया गया:** [Your Name]")
+st.sidebar.markdown("**सपोर्ट:** your.email@gmail.com")
+st.sidebar.markdown("---")
+st.sidebar.caption("Powered by Groq + Llama 3.1 ⚡")
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -37,6 +44,11 @@ for message in st.session_state.messages:
     elif isinstance(message, AIMessage):
         with st.chat_message("assistant"):
             st.markdown(message.content)
+            
+ # Add a "Clear Chat" button in sidebar
+if st.sidebar.button("🗑️ Clear Chat History"):
+    st.session_state.messages = []
+    st.rerun()  # Refresh the page           
 
 # Welcome message on first load
 if not st.session_state.messages:
