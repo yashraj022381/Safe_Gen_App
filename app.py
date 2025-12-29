@@ -5,14 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 
 st.set_page_config(page_title="India Helper AI Chatbot", page_icon="🇮🇳")
-st.title("🇮🇳 Bharat Helper AI - to solve every problem related to regional languages")
-# Sidebar info
-st.sidebar.markdown("## 🇮🇳 भारत हेल्पर AI")
-st.sidebar.markdown("यह AI भारत के लोगों की रोज़मर्रा की समस्याओं में मदद करने के लिए बनाया गया है।")
-st.sidebar.markdown("**बनाया गया:** [Yashraj Jagdale]")
-st.sidebar.markdown("**सपोर्ट:** your.email@gmail.com")
-st.sidebar.markdown("---")
-st.sidebar.caption("Powered by Groq + Llama 3.1 ⚡")
+st.title("🇮🇳 भारत हेल्पर AI - आपकी समस्याओं का समाधान")
 
 # Initialize chat history
 if "messages" not in st.session_state:
@@ -44,13 +37,6 @@ for message in st.session_state.messages:
     elif isinstance(message, AIMessage):
         with st.chat_message("assistant"):
             st.markdown(message.content)
-            # ... after displaying chat history ...
-
-# Sidebar with clear button
-st.sidebar.header("Options")
-if st.sidebar.button("🗑️ Clear Chat History"):
-    st.session_state.messages = []
-    st.rerun()
 
 # Welcome message on first load
 if not st.session_state.messages:
@@ -65,44 +51,30 @@ if prompt := st.chat_input("यहाँ अपनी समस्या लि�
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    with st.chat_message("assistant"): 
-        with st.spinner():
-            #message_placeholder = st.empty()  # Create empty space
-            message_placeholder.markdown("टाइप कर रहा हूँ... ✍️")
-            #message_placeholder.markdown(chain)
-
-        # Now generate response
-            llm = ChatGroq(..., model = "llama-3.1-8b-instant", 
-                           api_key=groq_api_key, 
-                           temperature=0.7
-                          )
-        # ... chain code ...
-
-        # responses = chain.invoke({...})
-
-        # Replace "typing" with real answer
-        #message_placeholder.markdown(response)
-            #llm = ChatGroq(
-                #model="llama-3.1-8b-instant",  # fast & good Hindi
+    with st.chat_message("assistant"):
+        with st.spinner("सोच रहा हूँ..."):
+            llm = ChatGroq(
+                model="llama-3.1-8b-instant",  # fast & good Hindi
                 # model="llama-3.1-70b-versatile",  # even better Hindi if you want (slightly slower)
-                #api_key=groq_api_key,
-                #temperature=0.7#)
+                api_key=groq_api_key,
+                temperature=0.7
+            )
 
-        prompt_template = ChatPromptTemplate.from_messages([
-            ("system", system_prompt),
-            MessagesPlaceholder(variable_name="chat_history"),
-            ("human", "{user_input}"),
-        ])
+            prompt_template = ChatPromptTemplate.from_messages([
+                ("system", system_prompt),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("human", "{user_input}"),
+            ])
 
-        chain = prompt_template | llm | StrOutputParser()
+            chain = prompt_template | llm | StrOutputParser()
 
-        chat_history_for_chain = st.session_state.messages[:-1]
+            chat_history_for_chain = st.session_state.messages[:-1]
 
-        response = chain.invoke({
-            "chat_history": chat_history_for_chain,
-            "user_input": prompt                
-        })
+            response = chain.invoke({
+                "chat_history": chat_history_for_chain,
+                "user_input": prompt
+            })
 
-        # message_placeholder.markdown(response)
-        st.markdown(response)
-st.session_state.messages.append(AIMessage(content=response))
+            st.markdown(response)
+
+    st.session_state.messages.append(AIMessage(content=response))
