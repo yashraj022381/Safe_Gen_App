@@ -68,6 +68,7 @@ if prompt := st.chat_input("यहाँ अपनी समस्या लि�
     with st.chat_message("assistant"): 
         message_placeholder = st.empty()  # Create empty space
         message_placeholder.markdown("टाइप कर रहा हूँ... ✍️")
+         message_placeholder.markdown(chain)
 
         # Now generate response
         llm = ChatGroq(..., model = "llama-3.1-8b-instant", 
@@ -98,9 +99,10 @@ if prompt := st.chat_input("यहाँ अपनी समस्या लि�
 
         response = chain.invoke({
             "chat_history": chat_history_for_chain,
+            
             "user_input": prompt                
         })
 
-        message_placeholder.markdown(response)
+        # message_placeholder.markdown(response)
         st.markdown(response)
 st.session_state.messages.append(AIMessage(content=response))
