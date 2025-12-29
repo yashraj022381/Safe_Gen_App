@@ -6,12 +6,12 @@ from langchain_core.output_parsers import StrOutputParser
 from streamlit_mic_recorder import mic_recorder
 
 st.set_page_config(page_title="Bharat Helper AI Chatbot", page_icon="🇮🇳")
-st.title("🇮🇳 भारत हेल्पर AI - आपकी समस्याओं का समाधान")
+st.title("🇮🇳 भारत हेल्पर\Bharat Helper AI - आपकी समस्याओं का समाधान")
 # Sidebar info
-st.sidebar.markdown("## 🇮🇳 भारत हेल्पर AI")
+st.sidebar.markdown("## 🇮🇳 भारत हेल्पर\Bharat Helper AI")
 st.sidebar.markdown("यह AI भारत के लोगों की रोज़मर्रा की समस्याओं में मदद करने के लिए बनाया गया है।")
-st.sidebar.markdown("**बनाया गया:** Yashraj")
-st.sidebar.markdown("**सपोर्ट:** your.email@gmail.com")
+st.sidebar.markdown("**बनाया गया\Created by:** Yashraj")
+st.sidebar.markdown("**सपोर्ट\Support:** your.email@gmail.com")
 st.sidebar.markdown("---")
 st.sidebar.caption("Powered by Groq + Llama 3.1 ⚡")
 
@@ -78,19 +78,20 @@ if st.sidebar.button("🗑️ Clear Chat History"):
 
 # Welcome message on first load
 if not st.session_state.messages:
-    welcome = "नमस्ते! 👋 मैं भारत हेल्पर हूँ।\n\nआप किसी भी समस्या के बारे में हिंदी या अंग्रेजी में पूछ सकते हैं - नौकरी, पढ़ाई, खेती, सरकारी योजना, स्वास्थ्य, या कुछ भी।\n\nक्या मदद चाहिए आज?"
+    welcome = "नमस्ते! 👋 मैं भारत हेल्पर हूँ।\n\nआप किसी भी समस्या के बारे में हिंदी या अंग्रेजी में पूछ सकते हैं - नौकरी, पढ़ाई, खेती, सरकारी योजना, स्वास्थ्य, या कुछ भी।\n\nक्या मदद चाहिए आज? \
+    Hello! 👋 I am Bharat Helper.\n\nI can help you in any problem you tell me that on Hindi or English or in any language you can ask - Jobs, Study, Farming, Government Schemes, Health, all most anything \n \n So what help do you want to today?"
     st.session_state.messages.append(AIMessage(content=welcome))
     with st.chat_message("assistant"):
         st.markdown(welcome)
 
 # User input
-if prompt := st.chat_input("यहाँ अपनी समस्या लिखें... (हिंदी या अंग्रेजी में)"):
+if prompt := st.chat_input("यहाँ अपनी समस्या लिखें... (हिंदी या अंग्रेजी में)\right down your problem"):
     st.session_state.messages.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("सोच रहा हूँ..."):
+        with st.spinner("सोच रहा हूँ\I am thinking..."):
             llm = ChatGroq(
                 model="llama-3.1-8b-instant",  # fast & good Hindi
                 # model="llama-3.1-70b-versatile",  # even better Hindi if you want (slightly slower)
