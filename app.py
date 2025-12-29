@@ -5,17 +5,15 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 from streamlit_mic_recorder import mic_recorder
 from langchain_community.tools import DuckDuckGoSearchRun
-from langchain.agents.react.agent import create_react_agent 
-from langchain.agents import AgentExecutor
 from langchain.prompts import PromptTemplate
 
 st.set_page_config(page_title="Bharat Helper AI Chatbot", page_icon="🇮🇳")
 st.title("🇮🇳 भारत हेल्पर\Bharat Helper AI - आपकी समस्याओं का समाधान")
 # Sidebar info
-st.sidebar.markdown("## 🇮🇳 भारत हेल्पर\Bharat Helper AI")
+st.sidebar.markdown(r"## 🇮🇳 भारत हेल्पर\Bharat Helper AI")
 st.sidebar.markdown("यह AI भारत के लोगों की रोज़मर्रा की समस्याओं में मदद करने के लिए बनाया गया है।")
-st.sidebar.markdown("**बनाया गया\Created by:** Yashraj")
-st.sidebar.markdown("**सपोर्ट\Support:** your.email@gmail.com")
+st.sidebar.markdown(r"**बनाया गया\Created by:** Yashraj")
+st.sidebar.markdown(r"**सपोर्ट\Support:** your.email@gmail.com")
 st.sidebar.markdown("---")
 st.sidebar.caption("Powered by Groq + Llama 3.1 ⚡")
 
@@ -96,6 +94,8 @@ if prompt := st.chat_input("यहाँ अपनी समस्या लि�
 
     with st.chat_message("assistant"):
         with st.spinner("सोच रहा हूँ...\nI am thinking..."):
+            needs_search = any(keyword in prompt.lower() for keyword in 
+                ["latest", "आज", "अभी", "ताजा", "नई", "update", "news", "कितना", "कीमत", "2025", "2026"])
             llm = ChatGroq(
                 model="llama-3.1-8b-instant",  # fast & good Hindi
                 # model="llama-3.1-70b-versatile",  # even better Hindi if you want (slightly slower)
@@ -103,47 +103,52 @@ if prompt := st.chat_input("यहाँ अपनी समस्या लि�
                 temperature=0.7
             )
 
-            # Add search tool
-            tools = [DuckDuckGoSearchRun()]
+            response = ""
+            if needs_search:
+                with st.status("🔍 वेब पर ताज़ा जानकारी खोज रहा हूँ..."):
+                    search = DuckDuckGoSearchRun()
+                    search_result = search.run(prompt)
+                    response += f"**ताज़ा जानकारी (वेब से):**\\n{search_result}\\n\\n"
 
            # Agent prompt for reasoning + tools
-            agent_prompt = PromptTemplate.from_template("""
-             {system_prompt}
+            #agent_prompt = PromptTemplate.from_template("""
+             #{system_prompt}
     
-              You have access to tools. Use them only if needed for the query.
+              #You have access to tools. Use them only if needed for the query.
     
-              Chat history: {chat_history}
-              User input: {user_input}
-            """)
+              #Chat history: {chat_history}
+              #User input: {user_input}
+            #""")
 
            # Create agent
-            agent = create_react_agent(llm, tools, agent_prompt)
-            agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
+           # agent = create_react_agent(llm, tools, agent_prompt)
+            #agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
 
-           # prompt_template = ChatPromptTemplate.from_messages([
-                #("system", system_prompt),
-                #MessagesPlaceholder(variable_name="chat_history"),
-                #("human", "{user_input}"),
-            #])
+            prompt_template = ChatPromptTemplate.from_messages([
+                ("system", system_prompt),
+                MessagesPlaceholder(variable_name="chat_history"),
+                ("human", "{user_input}"),
+                ("assistant", response) if needs_search else ("human", "{user_input}")
+            ])
 
-            #chain = prompt_template | llm | StrOutputParser()
+            chain = prompt_template | llm | StrOutputParser()
 
-            #chat_history_for_chain = st.session_state.messages[:-1]
+            chat_history_for_chain = st.session_state.messages[:-1]
 
-            #response = chain.invoke({
-                #"chat_history": chat_history_for_chain,
-                #"user_input": prompt
-            #})
-
-            #st.markdown(response)
-
+            final_response = chain.invoke({
+                "chat_history": chat_history_for_chain,
+                "user_input": prompt + (f"\\n\\nवेब सर्च रिजल्ट: {search_result}" if needs_search else "")
+            })
+            full_answer = response + final_response if needs_search else final_response
+            st.markdown(response)
+    st.session_state.messages.append(AIMessage(content=full_answer))
     #st.session_state.messages.append(AIMessage(content=response))
             # Invoke agent with history
-            input_data = {
-                "system_prompt": system_prompt,
-                "chat_history": "\n".join([msg.content for msg in st.session_state.messages[:-1]]),
-                "user_input": prompt
-            }
-            response = agent_executor.invoke(input_data)["output"]
+           # input_data = {
+            #    "system_prompt": system_prompt,
+             #   "chat_history": "\n".join([msg.content for msg in st.session_state.messages[:-1]]),
+              #  "user_input": prompt
+            #}
+            #response = agent_executor.invoke(input_data)["output"]
 
-            st.markdown(response)
+            
