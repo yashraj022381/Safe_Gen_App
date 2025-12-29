@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 from streamlit_mic_recorder import mic_recorder
 from langchain_community.tools import DuckDuckGoSearchRun
-from langchain.agents import create_react_agent, AgentExecutor
+from langchain.agents import create_agent, AgentExecutor
 from langchain.prompts import PromptTemplate
 
 st.set_page_config(page_title="Bharat Helper AI Chatbot", page_icon="🇮🇳")
@@ -116,7 +116,7 @@ if prompt := st.chat_input("यहाँ अपनी समस्या लि�
             """)
 
            # Create agent
-            agent = create_react_agent(llm, tools, agent_prompt)
+            agent = create_agent(llm, tools, agent_prompt)
             agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
 
            # prompt_template = ChatPromptTemplate.from_messages([
