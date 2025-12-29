@@ -79,13 +79,13 @@ if st.sidebar.button("🗑️ Clear Chat History"):
 # Welcome message on first load
 if not st.session_state.messages:
     welcome = "नमस्ते! 👋 मैं भारत हेल्पर हूँ।\n\nआप किसी भी समस्या के बारे में हिंदी या अंग्रेजी में पूछ सकते हैं - नौकरी, पढ़ाई, खेती, सरकारी योजना, स्वास्थ्य, या कुछ भी।\n\nक्या मदद चाहिए आज? \
-    Hello! 👋 I am Bharat Helper.\n\nI can help you in any problem you tell me that on Hindi or English or in any language you can ask - Jobs, Study, Farming, Government Schemes, Health, all most anything \n \n So what help do you want to today?"
+    \n Hello! 👋 I am Bharat Helper.\n\nI can help you in any problem you tell me that on Hindi or English or in any language you can ask - Jobs, Study, Farming, Government Schemes, Health, all most anything \n \n So what help do you want to today?"
     st.session_state.messages.append(AIMessage(content=welcome))
     with st.chat_message("assistant"):
         st.markdown(welcome)
 
 # User input
-if prompt := st.chat_input("यहाँ अपनी समस्या लिखें... (हिंदी या अंग्रेजी में)\right down your problem"):
+if prompt := st.chat_input("यहाँ अपनी समस्या लिखें... (हिंदी या अंग्रेजी में)\\nWrite down your problem in any language"):
     st.session_state.messages.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
