@@ -2,3 +2,5 @@ streamlit
 langchain
 langchain-groq
 langchain-core
+duckduckgo-search
+streamlit-mic-recorder
