@@ -3,13 +3,14 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
+from streamlit_mic_recorder import mic_recorder
 
-st.set_page_config(page_title="India Helper AI Chatbot", page_icon="🇮🇳")
+st.set_page_config(page_title="Bharat Helper AI Chatbot", page_icon="🇮🇳")
 st.title("🇮🇳 भारत हेल्पर AI - आपकी समस्याओं का समाधान")
 # Sidebar info
 st.sidebar.markdown("## 🇮🇳 भारत हेल्पर AI")
 st.sidebar.markdown("यह AI भारत के लोगों की रोज़मर्रा की समस्याओं में मदद करने के लिए बनाया गया है।")
-st.sidebar.markdown("**बनाया गया:** [Your Name]")
+st.sidebar.markdown("**बनाया गया:** Yashraj")
 st.sidebar.markdown("**सपोर्ट:** your.email@gmail.com")
 st.sidebar.markdown("---")
 st.sidebar.caption("Powered by Groq + Llama 3.1 ⚡")
@@ -44,6 +45,31 @@ for message in st.session_state.messages:
     elif isinstance(message, AIMessage):
         with st.chat_message("assistant"):
             st.markdown(message.content)
+
+# ... (after display history)
+
+# Mic input button
+audio = mic_recorder(start_prompt="🎤 Start recording", stop_prompt="🛑 Stop", key='recorder')
+
+if audio:
+    # Save audio to temp file
+    audio_path = "temp_audio.wav"
+    with open(audio_path, "wb") as f:
+        f.write(audio['bytes'])
+
+    # Transcribe with Groq Whisper (add your Groq key if not already)
+    from groq import Groq
+    client = Groq(api_key=groq_api_key)
+    with open(audio_path, "rb") as file:
+        transcription = client.audio.transcriptions.create(
+            file=(audio_path, file.read()),
+            model="whisper-large-v3",
+            response_format="text",
+            language="hi" if "hindi" in prompt.lower() else "en"  # Auto-detect or set
+        )
+    prompt = transcription  # Use transcribed text as input
+
+    # Then proceed with adding to messages and generating response as before
             
  # Add a "Clear Chat" button in sidebar
 if st.sidebar.button("🗑️ Clear Chat History"):
