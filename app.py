@@ -4,6 +4,9 @@ from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
 from streamlit_mic_recorder import mic_recorder
+from langchain.tools import DuckDuckGoSearchRun
+from langchain.agents import create_react_agent, AgentExecutor
+from langchain.prompts import PromptTemplate
 
 st.set_page_config(page_title="Bharat Helper AI Chatbot", page_icon="🇮🇳")
 st.title("🇮🇳 भारत हेल्पर\Bharat Helper AI - आपकी समस्याओं का समाधान")
@@ -79,19 +82,19 @@ if st.sidebar.button("🗑️ Clear Chat History"):
 # Welcome message on first load
 if not st.session_state.messages:
     welcome = "नमस्ते! 👋 मैं भारत हेल्पर हूँ।\n\nआप किसी भी समस्या के बारे में हिंदी या अंग्रेजी में पूछ सकते हैं - नौकरी, पढ़ाई, खेती, सरकारी योजना, स्वास्थ्य, या कुछ भी।\n\nक्या मदद चाहिए आज? \
-    \n Hello! 👋 I am Bharat Helper.\n\nI can help you in any problem you tell me that on Hindi or English or in any language you can ask - Jobs, Study, Farming, Government Schemes, Health, all most anything \n \n So what help do you want to today?"
+    \n\t Hello! 👋 I am Bharat Helper.\n\nI can help you in any problem you tell me that on Hindi or English or in any language you can ask - Jobs, Study, Farming, Government Schemes, Health, all most anything \n \n So what help do you want to today?"
     st.session_state.messages.append(AIMessage(content=welcome))
     with st.chat_message("assistant"):
         st.markdown(welcome)
 
 # User input
-if prompt := st.chat_input("यहाँ अपनी समस्या लिखें... (हिंदी या अंग्रेजी में)\\nWrite down your problem in any language"):
+if prompt := st.chat_input("यहाँ अपनी समस्या लिखें... (हिंदी या अंग्रेजी में)\n\nWrite down your problem... (in any language)"):
     st.session_state.messages.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("सोच रहा हूँ\I am thinking..."):
+        with st.spinner("सोच रहा हूँ...\nI am thinking..."):
             llm = ChatGroq(
                 model="llama-3.1-8b-instant",  # fast & good Hindi
                 # model="llama-3.1-70b-versatile",  # even better Hindi if you want (slightly slower)
@@ -99,21 +102,47 @@ if prompt := st.chat_input("यहाँ अपनी समस्या लि�
                 temperature=0.7
             )
 
-            prompt_template = ChatPromptTemplate.from_messages([
-                ("system", system_prompt),
-                MessagesPlaceholder(variable_name="chat_history"),
-                ("human", "{user_input}"),
-            ])
+            # Add search tool
+           tools = [DuckDuckGoSearchRun()]
 
-            chain = prompt_template | llm | StrOutputParser()
+           # Agent prompt for reasoning + tools
+           agent_prompt = PromptTemplate.from_template("""
+           {system_prompt}
+    
+           You have access to tools. Use them only if needed for the query.
+    
+           Chat history: {chat_history}
+           User input: {user_input}
+           """)
 
-            chat_history_for_chain = st.session_state.messages[:-1]
+           # Create agent
+           agent = create_react_agent(llm, tools, agent_prompt)
+           agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
 
-            response = chain.invoke({
-                "chat_history": chat_history_for_chain,
+           # prompt_template = ChatPromptTemplate.from_messages([
+                #("system", system_prompt),
+                #MessagesPlaceholder(variable_name="chat_history"),
+                #("human", "{user_input}"),
+            #])
+
+            #chain = prompt_template | llm | StrOutputParser()
+
+            #chat_history_for_chain = st.session_state.messages[:-1]
+
+            #response = chain.invoke({
+                #"chat_history": chat_history_for_chain,
+                #"user_input": prompt
+            #})
+
+            #st.markdown(response)
+
+    #st.session_state.messages.append(AIMessage(content=response))
+            # Invoke agent with history
+            input_data = {
+                "system_prompt": system_prompt,
+                "chat_history": "\n".join([msg.content for msg in st.session_state.messages[:-1]]),
                 "user_input": prompt
-            })
+            }
+            response = agent_executor.invoke(input_data)["output"]
 
             st.markdown(response)
-
-    st.session_state.messages.append(AIMessage(content=response))
