@@ -3,148 +3,150 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import AIMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.output_parsers import StrOutputParser
-from streamlit_mic_recorder import mic_recorder
+from groq import Groq
+import base64
+from elevenlabs.client import ElevenLabs
+from elevenlabs import Voice
 
+# Page config
+st.set_page_config(page_title="भारत हेल्पर AI", page_icon="🇮🇳")
+st.title("🇮🇳 Bharat Helper AI\भारत हेल्पर AI - बोलकर पूछो, सुनकर जवाब पाओ 🔊")
 
+# Sidebar
+st.sidebar.markdown(r"**# 🇮🇳 भारत हेल्पर AI\Bharat Helper AI**")
+st.sidebar.markdown(r"**🌟 बनाया\Created:** Yashraj")
+st.sidebar.markdown(r"**📧 सपोर्ट\Support:** your.email@gmail.com")
+st.sidebar.markdown(r"**🔊 Voice In & Out:** Groq Whisper + ElevenLabs Female")
 
-st.set_page_config(page_title="Bharat Helper AI Chatbot", page_icon="🇮🇳")
-st.title("🇮🇳 भारत हेल्पर\Bharat Helper AI - आपकी समस्याओं का समाधान")
-# Sidebar info
-st.sidebar.markdown(r"## 🇮🇳 भारत हेल्पर\Bharat Helper AI")
-st.sidebar.markdown("It was created for Indain peoples to solve their daily life problems in easier way.\n\nयह AI भारत के लोगों की रोज़मर्रा की समस्याओं में मदद करने के लिए बनाया गया है।")
-st.sidebar.markdown(r"**बनाया गया\Created by:** Yashraj")
-st.sidebar.markdown(r"**सपोर्ट\Support:** your.email@gmail.com")
-st.sidebar.markdown("---")
-st.sidebar.caption("Powered by Groq + Llama 3.1 ⚡")
-st.sidebar.markdown(r"**🌍 भाषाएँ:** हिंदी, मराठी, বাংলা, ਪੰਜਾਬੀ, தமிழ், తెలుగు और अधिक")
+# Clear chat
+if st.sidebar.button("🗑️ चैट हिस्ट्री साफ़ करें\Clear chat history"):
+    st.session_state.messages = []
+    st.rerun()
 
-# Initialize chat history
+# Initialize
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Get Groq API key
+# API Keys
 try:
     groq_api_key = st.secrets["GROQ_API_KEY"]
+    groq_client = Groq(api_key=groq_api_key)
 except:
-    st.error("⚠️ GROQ_API_KEY not found in Secrets. Add it in Settings → Secrets.")
+    st.error("⚠️ GROQ_API_KEY नहीं मिला।")
     st.stop()
 
-# Improved system prompt for natural Hindi + English
-system_prompt = """You are "Bharat Helper" - a friendly and reliable AI for people from every corner of India.
-- Respond in the same language the user uses (Hindi, Marathi, Bengali, Punjabi, Tamil, Telugu, Gujarati, Kannada, Malayalam, Bhojpuri, Haryanvi, etc.).
-- If the language is mixed, respond in the same mixed language.
-- The response should be simple, concise, and heartfelt.
-- Topics: Jobs, education, farming, government schemes, health, family, money, daily life, etc.
-- Always try to help and offer encouragement."""
+try:
+    elevenlabs_api_key = st.secrets["ELEVENLABS_API_KEY"]
+    eleven_client = ElevenLabs(api_key=elevenlabs_api_key)
+except:
+    st.warning("🔇 Voice output off - Add ELEVENLABS_API_KEY for female voice")
+    eleven_client = None
 
-# Display chat history
-for message in st.session_state.messages:
-    if isinstance(message, HumanMessage):
-        with st.chat_message("user"):
-            st.markdown(message.content)
-    elif isinstance(message, AIMessage):
-        with st.chat_message("assistant"):
-            st.markdown(message.content)
+# System prompt
+system_prompt = """आप "भारत हेल्पर" हैं - भारत के हर कोने के लोगों के लिए एक दोस्ताना और भरोसेमंद AI।
+- यूजर जो भी भाषा बोले या लिखे, उसी में जवाब दें (हिंदी, मराठी, बंगाली, पंजाबी, तमिल आदि)।
+- जवाब छोटा, स्पष्ट और हौसला देने वाला हो|\n\nYou are "Bharat Helper" - a friendly and reliable AI for people from every corner of India.
+- Respond in the same language the user speaks or writes (Hindi, Marathi, Bengali, Punjabi, Tamil, etc.).
+- The response should be short, clear, and encouraging."""
 
-# ... (after display history)
-
-# Mic input button
-audio = mic_recorder(start_prompt="🎤 Start recording", stop_prompt="🛑 Stop", key='recorder')
-
-if audio:
-    # Save audio to temp file
-    audio_path = "temp_audio.wav"
-    with open(audio_path, "wb") as f:
-        f.write(audio['bytes'])
-
-    # Transcribe with Groq Whisper (add your Groq key if not already)
-    from groq import Groq
-    client = Groq(api_key=groq_api_key)
-    with open(audio_path, "rb") as file:
-        transcription = client.audio.transcriptions.create(
-            file=(audio_path, file.read()),
-            model="whisper-large-v3",
-            response_format="text",
-            language="hi" if "hindi" in prompt.lower() else "en"  # Auto-detect or set
-        )
-    prompt = transcription  # Use transcribed text as input
-
-    # Then proceed with adding to messages and generating response as before
-            
- # Add a "Clear Chat" button in sidebar
-if st.sidebar.button("🗑️ Clear Chat History"):
-    st.session_state.messages = []
-    st.rerun()  # Refresh the page           
-
-# Welcome message on first load
+# Welcome
 if not st.session_state.messages:
     welcome = """नमस्ते! 🙏  
-নমস্কার! | नमस्कार! | ਸਤ ਸ੍ਰੀ ਅਕਾਲ! | નમસ્તે!  
-வணக்கம்! | నమస్కారం! | नमस्कार!
+अब आप बोलकर भी पूछ सकते हैं! 🎤  
+माइक बटन दबाएं → अपनी भाषा में बोलें → मैं सुनकर जवाब दूँगी 🔊
 
-मैं भारत हेल्पर हूँ।  
-आप अपनी मातृभाषा में कोई भी समस्या पूछ सकते हैं।  
-नौकरी, पढ़ाई, खेती, सरकारी योजना, स्वास्थ्य - सबके लिए मदद करता हूँ।
+कोई भी समस्या पूछिए - नौकरी, पढ़ाई, खेती, स्वास्थ्य, सरकारी योजना...\n\nHello! 🙏
+Now you can ask questions by speaking! 🎤
+Press the microphone button → Speak in your language → I will listen and reply 🔊
 
-आज आपकी क्या मदद करूँ? 😊 \
-    \n\t Hello! 👋 I am Bharat Helper.\n\nI can help you in any problem you tell me that on in Hindi, Marathi or English or in any language you like you can ask - Jobs, Study, Farming, Government Schemes, Health, all most anything. \n \n So what help do you want to today?"""
+Ask about any problem – jobs, studies, farming, health, government schemes..."""
     st.session_state.messages.append(AIMessage(content=welcome))
     with st.chat_message("assistant"):
         st.markdown(welcome)
 
-# User input
-if prompt := st.chat_input("Write down your problem... (in any language)\n\nयहाँ अपनी समस्या लिखें... (हिंदी, मराठी, বাংলা, ਪੰਜਾਬੀ, தமிழ் आदि)"):
+# Show history
+for msg in st.session_state.messages:
+    if isinstance(msg, HumanMessage):
+        with st.chat_message("user"):
+            st.markdown(msg.content)
+    elif isinstance(msg, AIMessage):
+        with st.chat_message("assistant"):
+            st.markdown(msg.content)
+
+# === MIC VOICE INPUT ===
+audio_bytes = st.experimental_audio_input("🎤 अपनी भाषा में बोलें\nSpeak in your own language")
+
+prompt = None
+if audio_bytes:
+    with st.spinner("आपकी बात सुन रही हूँ\nI'm listening to you..."):
+        # Save temp file
+        with open("temp_voice.wav", "wb") as f:
+            f.write(audio_bytes.getvalue())
+
+        # Transcribe with Groq Whisper (excellent for Indian languages)
+        with open("temp_voice.wav", "rb") as file:
+            transcription = groq_client.audio.transcriptions.create(
+                file=( "temp_voice.wav", file.read()),
+                model="whisper-large-v3",
+                response_format="text",
+                language=None  # Auto-detect
+            )
+        prompt = transcription.text
+        st.info(f"आपने कहा: **{prompt}**")
+
+# === TEXT INPUT FALLBACK ===
+if not prompt:
+    prompt = st.chat_input("या यहाँ लिखें... (हिंदी, मराठी, বাংলা, ਪੰਜਾਬੀ आदि)\nOr write here... (Hindi, Marathi, Bengali, Punjabi etc.)")
+
+# Process if there's input
+if prompt:
     st.session_state.messages.append(HumanMessage(content=prompt))
     with st.chat_message("user"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("I am thinking...\nसोच रहा हूँ..."):
+        with st.spinner("जवाब दे रही हूँ...\nI'm answering..."):
             llm = ChatGroq(
-                model="llama-3.1-8b-instant",  # fast & good Hindi
-                # model="llama-3.1-70b-versatile",  # even better Hindi if you want (slightly slower)
+                model="llama-3.1-70b-versatile",
                 api_key=groq_api_key,
-                temperature=0.7
+                temperature=0.6
             )
 
-
-           # Agent prompt for reasoning + tools
-            #agent_prompt = PromptTemplate.from_template("""
-             #{system_prompt}
-    
-              #You have access to tools. Use them only if needed for the query.
-    
-              #Chat history: {chat_history}
-              #User input: {user_input}
-            #""")
-
-           # Create agent
-           # agent = create_react_agent(llm, tools, agent_prompt)
-            #agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True, handle_parsing_errors=True)
-
-            prompt_template = ChatPromptTemplate.from_messages([
+            template = ChatPromptTemplate.from_messages([
                 ("system", system_prompt),
-                MessagesPlaceholder(variable_name="chat_history"),
-                ("human", "{user_input}")
+                MessagesPlaceholder("chat_history"),
+                ("human", "{input}")
             ])
 
-            chain = prompt_template | llm | StrOutputParser()
+            chain = template | llm | StrOutputParser()
+            history = st.session_state.messages[:-1]
 
-            chat_history_for_chain = st.session_state.messages[:-1]
-
-            final_response = chain.invoke({
-                "chat_history": chat_history_for_chain,
-                "user_input": prompt 
+            response = chain.invoke({
+                "chat_history": history,
+                "input": prompt
             })
-            st.markdown(final_response)
-    st.session_state.messages.append(AIMessage(content=final_response))
-    #st.session_state.messages.append(AIMessage(content=response))
-            # Invoke agent with history
-           # input_data = {
-            #    "system_prompt": system_prompt,
-             #   "chat_history": "\n".join([msg.content for msg in st.session_state.messages[:-1]]),
-              #  "user_input": prompt
-            #}
-            #response = agent_executor.invoke(input_data)["output"]
 
-            
+            st.markdown(response)
+
+            # === FEMALE VOICE OUTPUT ===
+            if eleven_client:
+                try:
+                    voice = Voice(voice_id="21m00Tcm4TlvDq8ikWAM")  # Rachel - natural female
+                    audio_stream = eleven_client.generate(
+                        text=response,
+                        voice=voice,
+                        model="eleven_multilingual_v2"
+                    )
+                    audio_bytes = b"".join(list(audio_stream))
+                    audio_base64 = base64.b64encode(audio_bytes).decode()
+                    audio_html = f"""
+                    <audio controls autoplay>
+                        <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
+                    </audio>
+                    """
+                    st.markdown(audio_html, unsafe_allow_html=True)
+                    st.caption("🔊 मैं बोल रही हूँ!")
+                except Exception as e:
+                    st.caption("Voice error")
+
+    st.session_state.messages.append(AIMessage(content=response))
