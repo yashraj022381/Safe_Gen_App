@@ -3,4 +3,4 @@ langchain
 langchain-groq
 langchain-core
 streamlit-mic-recorder
-pip install --upgrade pip
+
