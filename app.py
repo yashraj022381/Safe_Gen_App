@@ -113,7 +113,7 @@ if prompt := st.chat_input("अपनी भाषा में लिखें.
         with st.spinner("जवाब दे रहा हूँ...\n\nI am responding..."):
             # Use slightly smarter model for better language handling
             llm = ChatGroq(
-                model="llama-3.1-70b-versatile",  # Better at Indian languages than 8b
+                model="llama-3.3-70b-versatile",  # Better at Indian languages than 8b
                 # model="llama-3.1-8b-instant",  # Use this if you want max speed
                 api_key=groq_api_key,
                 temperature=0.7,
