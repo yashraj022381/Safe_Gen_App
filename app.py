@@ -10,11 +10,11 @@ st.set_page_config(page_title="भारत हेल्पर AI\nBharat Helper
 st.title("🇮🇳 भारत हेल्पर AI - अपनी भाषा में मदद\nBharat Helper AI - Help in your language")
 
 # Sidebar
-st.sidebar.markdown(r"**# 🇮🇳 भारत हेल्पर AI\nBharat Helper AI**")
-st.sidebar.markdown(r"**🌟 बनाया\nCreated by:** Yashraj")
-st.sidebar.markdown(r"**📧 सपोर्ट\Support:** your.email@gmail.com")
-st.sidebar.markdown(r"**⚡ Powered by:** Groq + Llama 3.1")
-st.sidebar.markdown(r"**🌍 भाषाएँ:** हिंदी, मराठी, বাংলা, ਪੰਜਾਬੀ, தமிழ், తెలుగు और अधिक\nLanguages: Hindi, Marathi, Bengali, Punjabi, Tamil, Telugu and more")
+st.sidebar.markdown("**# 🇮🇳 भारत हेल्पर AI\nBharat Helper AI**")
+st.sidebar.markdown("**🌟 बनाया\nCreated by:** Yashraj")
+st.sidebar.markdown("**📧 सपोर्ट\Support:** your.email@gmail.com")
+st.sidebar.markdown("**⚡ Powered by:** Groq + Llama 3.1")
+st.sidebar.markdown("**🌍 भाषाएँ:** हिंदी, मराठी, বাংলা, ਪੰਜਾਬੀ, தமிழ், తెలుగు और अधिक\nLanguages: Hindi, Marathi, Bengali, Punjabi, Tamil, Telugu and more")
 
 # Clear chat
 if st.sidebar.button("🗑️ चैट हिस्ट्री साफ़ करें\nClear Chat History"):
