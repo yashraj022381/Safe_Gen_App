@@ -4,3 +4,4 @@ langchain-groq
 langchain-core
 langchain-community
 streamlit-mic-recorder
+elevenlabs
