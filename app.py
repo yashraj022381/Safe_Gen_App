@@ -65,9 +65,8 @@ I provide help with jobs, education, farming, government schemes, health – and
 
 How can I help you today?"""
     
+    
     st.session_state.messages.append(AIMessage(content=welcome))
-    with st.chat_message("assistant"):
-        st.markdown(welcome)
 
 # Show history
 for msg in st.session_state.messages:
