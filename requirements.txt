@@ -6,4 +6,4 @@ langchain-core
 langchain-community
 streamlit-mic-recorder
 elevenlabs
-streamlit-experimental-audio-input
+--upgrade pip
