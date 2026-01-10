@@ -1,1 +1,1 @@
-# Safe_Gen_App
+# GenAI_Translator_App
