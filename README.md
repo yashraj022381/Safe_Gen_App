@@ -1,1 +1,1 @@
-# GenAI_Translator_App
+# GenAI_Multi_lang_Translator_App
